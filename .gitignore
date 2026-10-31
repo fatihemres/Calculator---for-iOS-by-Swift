@@ -1,0 +1,14 @@
+# Local Xcode metadata. Already-tracked files stay tracked.
+**/xcuserdata/
+*.xcuserstate
+
+# Generated build products
+DerivedData/
+build/
+.build/
+*.ipa
+*.dSYM
+*.dSYM.zip
+.DS_Store
+
+# Shared schemes under xcshareddata/xcschemes remain tracked.

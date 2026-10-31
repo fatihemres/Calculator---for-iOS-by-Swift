@@ -1,0 +1,54 @@
+name: iOS Simulator build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Calculator/**'
+      - 'Calculator.xcodeproj/**'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Calculator/**'
+      - 'Calculator.xcodeproj/**'
+      - '.github/workflows/ios-build.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: calculator-ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator-build:
+    name: Xcode 16.4 / iOS Simulator build
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Use Xcode 16.4
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Verify shared Calculator scheme
+        run: xcodebuild -list -project Calculator.xcodeproj
+
+      - name: Build for generic iOS Simulator
+        run: |
+          xcodebuild build \
+            -project Calculator.xcodeproj \
+            -scheme Calculator \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "${RUNNER_TEMP}/CalculatorDerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+
+# Build-only check. This repository has no configured XCTest target.
