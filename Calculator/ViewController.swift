@@ -10,58 +10,63 @@ import UIKit
 class ViewController: UIViewController {
 
     @IBOutlet weak var firstText: UITextField!
-    
     @IBOutlet weak var secondText: UITextField!
-    
     @IBOutlet weak var resultLabel: UILabel!
-    
-    var result = 0
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
+
+    private enum Operation {
+        case add
+        case subtract
+        case multiply
+        case divide
     }
 
     @IBAction func sumClick(_ sender: Any) {
-        
-        if let firstNumber = Int(firstText.text!){
-            if let secondNumber = Int(secondText.text!){
-                
-                result = firstNumber + secondNumber
-                resultLabel.text = String(result)
-            }
-        }
+        calculate(.add)
     }
-    
+
     @IBAction func minusClick(_ sender: Any) {
-        if let firstNumber = Int(firstText.text!){
-            if let secondNumber = Int(secondText.text!){
-                
-               result = firstNumber - secondNumber
-                resultLabel.text = String(result)
-            }
-        }
+        calculate(.subtract)
     }
-    
-    
+
     @IBAction func multiplyClick(_ sender: Any) {
-        if let firstNumber = Int(firstText.text!){
-            if let secondNumber = Int(secondText.text!){
-                
-                result = firstNumber * secondNumber
-                resultLabel.text = String(result)
-            }
-        }
+        calculate(.multiply)
     }
-    
+
     @IBAction func divideClick(_ sender: Any) {
-        if let firstNumber = Int(firstText.text!){
-            if let secondNumber = Int(secondText.text!){
-                
-                result = firstNumber / secondNumber
-                resultLabel.text = String(result)
-            }
+        calculate(.divide)
+    }
+
+    private func calculate(_ operation: Operation) {
+        guard
+            let first = Int(firstText.text ?? ""),
+            let second = Int(secondText.text ?? "")
+        else {
+            resultLabel.text = "Enter valid whole numbers"
+            return
         }
+
+        let outcome: (partialValue: Int, overflow: Bool)
+
+        switch operation {
+        case .add:
+            outcome = first.addingReportingOverflow(second)
+        case .subtract:
+            outcome = first.subtractingReportingOverflow(second)
+        case .multiply:
+            outcome = first.multipliedReportingOverflow(by: second)
+        case .divide:
+            guard second != 0 else {
+                resultLabel.text = "Cannot divide by zero"
+                return
+            }
+            outcome = first.dividedReportingOverflow(by: second)
+        }
+
+        guard !outcome.overflow else {
+            resultLabel.text = "Result is out of range"
+            return
+        }
+
+        resultLabel.text = String(outcome.partialValue)
     }
 }
-
